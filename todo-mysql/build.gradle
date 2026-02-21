@@ -1,0 +1,59 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.2'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '6.25.0'
+}
+
+group = 'com.asdf'
+version = '0.0.1-dev'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// 1. MySQL 드라이버 이름 변경 및 버전 생략 (runtimeOnly 권장)
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+	testImplementation 'org.testcontainers:testcontainers:1.20.1'
+	testImplementation 'org.testcontainers:mysql:1.20.1'
+
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+
+	testLogging{
+		events "passed", "skipped", "failed"
+		outputs.upToDateWhen {false}
+		jvmArgs '-XX:+EnableDynamicAgentLoading' // Java 21 Mockito 에러 방지용 (아주 잘 넣으셨습니다!)
+	}
+}
+
+spotless {
+	java {
+		googleJavaFormat('1.22.0').aosp().reflowLongStrings()
+	}
+}
+
+// 2. 이 부분은 CI/CD 환경을 고려해 잠시 주석 처리하거나 빼두는 것을 권장합니다.
+// build.dependsOn 'spotlessApply'
